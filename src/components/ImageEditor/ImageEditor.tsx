@@ -1,139 +1,121 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Upload, Download, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { BorderOptions } from "./BorderOptions";
 import { BackgroundOptions } from "./BackgroundOptions";
+import { Canvas, ICanvas } from "fabric";
+import { ResizeOptions } from "./ResizeOptions";
 
 const ImageEditor = () => {
-  const [image, setImage] = useState<string | null>(null);
-  const [borderWidth, setBorderWidth] = useState(0);
-  const [borderColor, setBorderColor] = useState("#000000");
-  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const [canvas, setCanvas] = useState<ICanvas | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const fabricCanvas = new Canvas(canvasRef.current, {
+      width: 800,
+      height: 600,
+      backgroundColor: "#ffffff",
+    });
+
+    setCanvas(fabricCanvas);
+
+    return () => {
+      fabricCanvas.dispose();
+    };
+  }, []);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+    if (!file || !canvas) return;
 
-  const handleDownload = () => {
-    if (!image) return;
-    
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    
-    img.onload = () => {
-      canvas.width = img.width + borderWidth * 2;
-      canvas.height = img.height + borderWidth * 2;
-      
-      if (ctx) {
-        // Draw background
-        ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imgData = event.target?.result as string;
+      fabric.Image.fromURL(imgData, (img) => {
+        canvas.clear();
         
-        // Draw border
-        ctx.fillStyle = borderColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Center the image and scale it to fit
+        const scaling = Math.min(
+          canvas.width! / img.width!,
+          canvas.height! / img.height!
+        ) * 0.8;
         
-        // Draw image
-        ctx.drawImage(
-          img,
-          borderWidth,
-          borderWidth,
-          img.width,
-          img.height
-        );
-        
-        // Create download link
-        const link = document.createElement("a");
-        link.download = "edited-image.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+        img.scale(scaling);
+        img.center();
+        canvas.add(img);
+        canvas.renderAll();
         
         toast({
           title: "Success!",
-          description: "Your image has been downloaded.",
+          description: "Image uploaded successfully.",
         });
-      }
+      });
     };
-    
-    img.src = image;
+    reader.readAsDataURL(file);
+  };
+
+  const handleDownload = () => {
+    if (!canvas) return;
+
+    const dataURL = canvas.toDataURL({
+      format: 'png',
+      quality: 1,
+    });
+
+    const link = document.createElement("a");
+    link.download = "edited-image.png";
+    link.href = dataURL;
+    link.click();
+
+    toast({
+      title: "Success!",
+      description: "Your image has been downloaded.",
+    });
   };
 
   return (
-    <div className="image-editor-container">
-      <div className="editor-header">
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Image Editor</h1>
-        <Button onClick={handleDownload} disabled={!image}>
-          <Download className="w-4 h-4 mr-2" />
-          Download
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Image
+          </Button>
+          <Button onClick={handleDownload}>
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
+        </div>
       </div>
 
-      <div className="editor-toolbar">
-        <Button
-          variant="outline"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Image
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleImageUpload}
-        />
-      </div>
-
-      <div className="editor-main">
-        <div className="editor-canvas">
-          {image ? (
-            <div
-              style={{
-                padding: borderWidth,
-                backgroundColor: borderColor,
-                background: backgroundColor,
-              }}
-            >
-              <img
-                src={image}
-                alt="Edited"
-                className="max-w-full max-h-[70vh] object-contain"
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-gray-400">
-              <ImageIcon className="w-16 h-16 mb-4" />
-              <p>Upload an image to get started</p>
-            </div>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
+        <div className="editor-canvas bg-gray-50 rounded-lg overflow-hidden shadow-md">
+          <canvas ref={canvasRef} />
         </div>
 
-        <div className="editor-sidebar">
-          <BorderOptions
-            borderWidth={borderWidth}
-            borderColor={borderColor}
-            onWidthChange={setBorderWidth}
-            onColorChange={setBorderColor}
+        <div className="editor-sidebar space-y-6 bg-white p-4 rounded-lg shadow-md">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
           />
-          <BackgroundOptions
-            backgroundColor={backgroundColor}
-            onColorChange={setBackgroundColor}
-          />
+          
+          <ResizeOptions canvas={canvas} />
+          <BorderOptions canvas={canvas} />
+          <BackgroundOptions canvas={canvas} />
         </div>
       </div>
     </div>

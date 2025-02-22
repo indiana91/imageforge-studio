@@ -3,17 +3,20 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { ICanvas } from "fabric";
 
 interface BackgroundOptionsProps {
-  backgroundColor: string;
-  onColorChange: (color: string) => void;
+  canvas: ICanvas | null;
 }
 
-export const BackgroundOptions = ({
-  backgroundColor,
-  onColorChange,
-}: BackgroundOptionsProps) => {
+export const BackgroundOptions = ({ canvas }: BackgroundOptionsProps) => {
   const { toast } = useToast();
+
+  const handleBackgroundColorChange = (color: string) => {
+    if (!canvas) return;
+    canvas.backgroundColor = color;
+    canvas.renderAll();
+  };
 
   const handleRemoveBackground = () => {
     toast({
@@ -23,7 +26,7 @@ export const BackgroundOptions = ({
   };
 
   return (
-    <div className="space-y-6 mt-6 pt-6 border-t">
+    <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium mb-4">Background</h3>
         <div className="space-y-4">
@@ -32,15 +35,9 @@ export const BackgroundOptions = ({
             <div className="flex gap-2">
               <Input
                 type="color"
-                value={backgroundColor}
-                onChange={(e) => onColorChange(e.target.value)}
+                defaultValue="#ffffff"
+                onChange={(e) => handleBackgroundColorChange(e.target.value)}
                 className="w-12 h-12 p-1"
-              />
-              <Input
-                type="text"
-                value={backgroundColor}
-                onChange={(e) => onColorChange(e.target.value)}
-                className="flex-1"
               />
             </div>
           </div>
