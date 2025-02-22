@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Canvas } from "fabric";
+import { Paintbrush } from "lucide-react";
 
 interface BackgroundOptionsProps {
   canvas: Canvas | null;
@@ -26,29 +27,30 @@ export const BackgroundOptions = ({ canvas }: BackgroundOptionsProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-4">Background</h3>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Color</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                defaultValue="#ffffff"
-                onChange={(e) => handleBackgroundColorChange(e.target.value)}
-                className="w-12 h-12 p-1"
-              />
-            </div>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Paintbrush className="w-5 h-5" />
+        <h3 className="text-lg font-medium">Background</h3>
+      </div>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-gray-400">Color</Label>
+          <div className="flex gap-2">
+            <Input
+              type="color"
+              defaultValue="#1a1f2c"
+              onChange={(e) => handleBackgroundColorChange(e.target.value)}
+              className="w-12 h-12 p-1 bg-transparent border border-gray-700"
+            />
           </div>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleRemoveBackground}
-          >
-            Remove Background
-          </Button>
         </div>
+        <Button
+          variant="outline"
+          className="w-full bg-transparent border-gray-700 hover:bg-gray-800"
+          onClick={handleRemoveBackground}
+        >
+          Remove Background
+        </Button>
       </div>
     </div>
   );

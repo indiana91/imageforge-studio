@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Canvas } from "fabric";
 import { useToast } from "@/components/ui/use-toast";
+import { Expand } from "lucide-react";
 
 interface ResizeOptionsProps {
   canvas: Canvas | null;
@@ -55,28 +56,36 @@ export const ResizeOptions = ({ canvas }: ResizeOptionsProps) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Resize</h3>
+      <div className="flex items-center gap-2">
+        <Expand className="w-5 h-5" />
+        <h3 className="text-lg font-medium">Resize</h3>
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Width (px)</Label>
+          <Label className="text-gray-400">Width (px)</Label>
           <Input
             type="number"
             value={width}
             onChange={(e) => setWidth(e.target.value)}
             placeholder="Width"
+            className="bg-transparent border-gray-700"
           />
         </div>
         <div className="space-y-2">
-          <Label>Height (px)</Label>
+          <Label className="text-gray-400">Height (px)</Label>
           <Input
             type="number"
             value={height}
             onChange={(e) => setHeight(e.target.value)}
             placeholder="Height"
+            className="bg-transparent border-gray-700"
           />
         </div>
       </div>
-      <Button onClick={handleResize} className="w-full">
+      <Button 
+        onClick={handleResize} 
+        className="w-full bg-teal-600 hover:bg-teal-700"
+      >
         Resize Image
       </Button>
     </div>

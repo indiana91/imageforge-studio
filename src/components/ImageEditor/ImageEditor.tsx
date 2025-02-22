@@ -2,20 +2,22 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Download, Image as ImageIcon } from "lucide-react";
+import {
+  Upload,
+  Download,
+  Image as ImageIcon,
+  RotateCcw,
+  Frame,
+  Layers,
+  PenTool,
+  Settings,
+} from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { BorderOptions } from "./BorderOptions";
 import { BackgroundOptions } from "./BackgroundOptions";
-import { Canvas } from "fabric";
+import { Canvas, loadSVGFromURL } from "fabric";
 import * as fabric from 'fabric';
 import { ResizeOptions } from "./ResizeOptions";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 const ImageEditor = () => {
   const [canvas, setCanvas] = useState<Canvas | null>(null);
@@ -29,7 +31,7 @@ const ImageEditor = () => {
     const fabricCanvas = new Canvas(canvasRef.current, {
       width: 800,
       height: 600,
-      backgroundColor: "#ffffff",
+      backgroundColor: "#1a1f2c",
     });
 
     setCanvas(fabricCanvas);
@@ -46,10 +48,9 @@ const ImageEditor = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const imgData = event.target?.result as string;
-      fabric.Image.fromURL(imgData, (img) => {
+      fabric.Image.fromURL(imgData, (img: fabric.Image) => {
         canvas.clear();
         
-        // Center the image and scale it to fit
         const scaling = Math.min(
           canvas.width! / img.width!,
           canvas.height! / img.height!
@@ -74,6 +75,7 @@ const ImageEditor = () => {
 
     const dataURL = canvas.toDataURL({
       format: 'png',
+      multiplier: 1,
       quality: 1,
     });
 
@@ -89,49 +91,66 @@ const ImageEditor = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 min-h-screen bg-gray-50">
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold flex items-center justify-between">
-            <span>Image Editor</span>
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2"
-              >
-                <Upload className="w-4 h-4" />
-                Upload Image
-              </Button>
-              <Button onClick={handleDownload} className="flex items-center gap-2">
-                <Download className="w-4 h-4" />
-                Download
-              </Button>
-            </div>
-          </CardTitle>
-          <CardDescription>
-            Edit, resize, and export your images for social media
-          </CardDescription>
-        </CardHeader>
-      </Card>
+    <div className="min-h-screen bg-[#221F26] text-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 bg-[#1A1F2C]/50 backdrop-blur-sm border-b border-gray-800">
+        <div className="flex items-center gap-2">
+          <ImageIcon className="w-6 h-6" />
+          <span className="text-lg font-semibold">Image Editor</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="bg-transparent border-gray-700 hover:bg-gray-800"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload
+          </Button>
+          <Button onClick={handleDownload} className="bg-teal-600 hover:bg-teal-700">
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
-        <Card className="editor-canvas overflow-hidden">
-          <CardContent className="p-0">
-            <div className="relative w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
-              <canvas ref={canvasRef} className="max-w-full max-h-full" />
-              {!canvas && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                  <ImageIcon className="w-16 h-16 mb-4" />
-                  <p>Upload an image to get started</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <div className="flex h-[calc(100vh-64px)]">
+        {/* Tools Sidebar */}
+        <div className="w-16 bg-[#1A1F2C] border-r border-gray-800">
+          <div className="flex flex-col items-center gap-4 p-4">
+            <Button variant="ghost" size="icon" className="hover:bg-gray-800">
+              <RotateCcw className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-800">
+              <Frame className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-800">
+              <Layers className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-800">
+              <PenTool className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-800">
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
 
-        <Card className="editor-sidebar">
-          <CardContent className="space-y-6">
+        {/* Canvas Area */}
+        <div className="flex-1 bg-[#1A1F2C] relative">
+          <canvas ref={canvasRef} className="absolute inset-0 m-auto" />
+          {!canvas && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+              <ImageIcon className="w-16 h-16 mb-4" />
+              <p>Upload an image to get started</p>
+            </div>
+          )}
+        </div>
+
+        {/* Control Sidebar */}
+        <div className="w-80 bg-[#1A1F2C] border-l border-gray-800 overflow-y-auto">
+          <div className="p-6 space-y-6">
             <input
               ref={fileInputRef}
               type="file"
@@ -139,12 +158,11 @@ const ImageEditor = () => {
               className="hidden"
               onChange={handleImageUpload}
             />
-            
             <ResizeOptions canvas={canvas} />
             <BorderOptions canvas={canvas} />
             <BackgroundOptions canvas={canvas} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
