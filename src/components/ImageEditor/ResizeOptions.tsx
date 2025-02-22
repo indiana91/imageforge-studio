@@ -3,11 +3,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ICanvas } from "fabric";
+import { Canvas } from "fabric";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ResizeOptionsProps {
-  canvas: ICanvas | null;
+  canvas: Canvas | null;
 }
 
 export const ResizeOptions = ({ canvas }: ResizeOptionsProps) => {

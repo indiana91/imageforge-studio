@@ -2,10 +2,10 @@
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { ICanvas } from "fabric";
+import { Canvas } from "fabric";
 
 interface BorderOptionsProps {
-  canvas: ICanvas | null;
+  canvas: Canvas | null;
 }
 
 export const BorderOptions = ({ canvas }: BorderOptionsProps) => {

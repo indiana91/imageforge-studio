@@ -6,11 +6,19 @@ import { Upload, Download, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { BorderOptions } from "./BorderOptions";
 import { BackgroundOptions } from "./BackgroundOptions";
-import { Canvas, ICanvas } from "fabric";
+import { Canvas } from "fabric";
+import * as fabric from 'fabric';
 import { ResizeOptions } from "./ResizeOptions";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const ImageEditor = () => {
-  const [canvas, setCanvas] = useState<ICanvas | null>(null);
+  const [canvas, setCanvas] = useState<Canvas | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -81,42 +89,62 @@ const ImageEditor = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Image Editor</h1>
-        <div className="flex gap-4">
-          <Button
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Upload Image
-          </Button>
-          <Button onClick={handleDownload}>
-            <Download className="w-4 h-4 mr-2" />
-            Download
-          </Button>
-        </div>
-      </div>
+    <div className="container mx-auto p-6 min-h-screen bg-gray-50">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold flex items-center justify-between">
+            <span>Image Editor</span>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Upload Image
+              </Button>
+              <Button onClick={handleDownload} className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Download
+              </Button>
+            </div>
+          </CardTitle>
+          <CardDescription>
+            Edit, resize, and export your images for social media
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
-        <div className="editor-canvas bg-gray-50 rounded-lg overflow-hidden shadow-md">
-          <canvas ref={canvasRef} />
-        </div>
+        <Card className="editor-canvas overflow-hidden">
+          <CardContent className="p-0">
+            <div className="relative w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
+              <canvas ref={canvasRef} className="max-w-full max-h-full" />
+              {!canvas && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                  <ImageIcon className="w-16 h-16 mb-4" />
+                  <p>Upload an image to get started</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="editor-sidebar space-y-6 bg-white p-4 rounded-lg shadow-md">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageUpload}
-          />
-          
-          <ResizeOptions canvas={canvas} />
-          <BorderOptions canvas={canvas} />
-          <BackgroundOptions canvas={canvas} />
-        </div>
+        <Card className="editor-sidebar">
+          <CardContent className="space-y-6">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            
+            <ResizeOptions canvas={canvas} />
+            <BorderOptions canvas={canvas} />
+            <BackgroundOptions canvas={canvas} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

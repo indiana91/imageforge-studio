@@ -3,10 +3,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { ICanvas } from "fabric";
+import { Canvas } from "fabric";
 
 interface BackgroundOptionsProps {
-  canvas: ICanvas | null;
+  canvas: Canvas | null;
 }
 
 export const BackgroundOptions = ({ canvas }: BackgroundOptionsProps) => {
